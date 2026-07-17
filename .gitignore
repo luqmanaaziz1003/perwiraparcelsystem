@@ -25,3 +25,7 @@ desktop.ini
 .env
 .env.local
 db_connect.local.php
+config.local.php
+
+# Real seed rows — contain IC numbers and passwords. This repo is public.
+supabase/seed.local.sql
