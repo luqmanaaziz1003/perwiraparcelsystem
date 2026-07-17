@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PPC Receiver Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="icon" href="assets/Icon Web.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body class="receiver-dashboard-body">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg receiver-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#" style="color: #fff; font-family: 'Poppins', sans-serif;">
+                PERWIRA PARCEL CENTER
+                <img src="assets/Icon Web.ico" alt="Parcel Icon" class="me-2" style="width: 30px; height: 30px;" />
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <button class="btn btn-link nav-link dashboard-logout-btn" onclick="redirectToLandingPage()">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="container mt-4">
+        <h2 class="mb-4" style="font-weight: 600;">
+            Welcome !
+        </h2>
+
+        <ul class="nav nav-tabs" id="receiverDashboardTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active" id="tracking-tab" data-bs-toggle="tab" data-bs-target="#tracking" type="button" role="tab">Tracking</button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab">Parcel Details</button>
+            </li>
+        </ul>
+
+<div class="tab-content">
+    <!-- 🔹 Tracking Tab -->
+    <div class="tab-pane fade show active" id="tracking" role="tabpanel">
+        <h5>Tracking Number</h5>
+        <p>View the tracking journey of your parcel.</p>
+        <div class="alert alert-info">Tracking info updates in real-time.</div>
+        <div class="input-group mb-3">
+            <input type="text" id="trackingInput" class="form-control" placeholder="Enter tracking number" aria-label="Tracking Number" required />
+            <button class="btn btn-primary" onclick="trackParcel()">Track</button>
+        </div>
+    </div>
+
+    <!-- Parcel Details Tab (MUST use tab-pane with id="details") -->
+    <div class="tab-pane fade" id="details" role="tabpanel">
+        <div class="mb-3">
+            <label for="statusFilter" class="form-label">Filter by Status:</label>
+            <select class="form-select" id="statusFilter">
+                <option value="all">All</option>
+                <option value="pending">Pending</option>
+                <option value="delivered">Retrieved</option>
+            </select>
+        </div>
+
+        <table id="detailsTable" class="table">
+            <thead>
+                <tr>
+                    <th>Size</th>
+                    <th>Weight</th>
+                    <th>Tracking Number</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated here after tracking -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+            
+
+
+            <!-- Receiver Details Tab -->
+            <div class="tab-pane fade" id="receiver" role="tabpanel">
+                <h5>Receiver Details</h5>
+                <p>Review the designated recipient of the package.</p>
+                <div class="mb-3">
+                    <label for="receiverName" class="form-label">Name:</label>
+                    <input type="text" class="form-control" id="receiverName" placeholder="Enter your name" />
+                </div>
+                <div class="mb-3">
+                    <label for="receiverPhone" class="form-label">Phone No:</label>
+                    <input type="text" class="form-control" id="receiverPhone" placeholder="Enter your phone number" />
+                </div>
+                <button class="btn btn-primary" onclick="editReceiverDetails()">Save details</button>
+            </div>
+        </div>
+
+        <!-- Parcel Info Modal -->
+        <div class="modal fade" id="parcelInfoModal" tabindex="-1" aria-labelledby="parcelInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="parcelInfoModalLabel">Parcel Information</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Parcel Number: PPC123456789</p>
+                        <p>Courier: JNT</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white py-4 mt-5 border-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <h5 class="mb-3 text-uthm">Perwira Parcel Center</h5>
+                    <p class="text-muted small">
+                        A service of Universiti Tun Hussein Onn Malaysia<br>
+                        Your trusted partner in parcel management and delivery services.
+                    </p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="mb-3 text-uthm">Contact Us</h5>
+                    <ul class="list-unstyled text-muted small">
+                        <li><i class="fas fa-envelope me-2"></i>info@perwiraparcel.uthm.edu.my</li>
+                        <li><i class="fas fa-phone me-2"></i>+60 11-1589 5859</li>
+                        <li><i class="fas fa-map-marker-alt me-2"></i>
+                            Jalan Desasiswa, Parit Sempadan Laut, 86400 Parit Raja, Johor, Malaysia
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <!-- Delivery Partners -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h5 class="mb-3 text-uthm text-center">Our Delivery Partners</h5>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center px-5">
+                        <img src="assets/posMalaysia.png" alt="Pos Malaysia" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/gdex.png" alt="GDEX" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/flashexpress.png" alt="Flash Express" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/shopeeExpress.jpeg" alt="Shopee Express" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/JNT.webp" alt="J&T" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/dhl.png" alt="DHL" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/fedex.png" alt="Fedex" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                        <img src="assets/ninjavan.png" alt="Ninjavan" class="img-fluid mx-3 my-2" style="width: 80px; height: auto;">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <div class="copyright text-center text-muted small">
+                <p class="mb-0">Made <i class="fas fa-heart text-danger"></i> by Group 7</p>
+                &copy; All rights reserved.
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function redirectToLandingPage() {
+            window.location.href = 'landingpage.html'; // Redirect to the landing page
+        }
+
+    
+document.getElementById('statusFilter').addEventListener('change', function () {
+    const selectedStatus = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#detailsTable tbody tr');
+
+    rows.forEach(row => {
+        const statusCell = row.cells[3]; // Index 3 is the "Status" column
+        const status = statusCell.textContent.toLowerCase();
+
+        if (selectedStatus === 'all' || status === selectedStatus) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+});
+
+
+
+        document.getElementById('statusFilter').addEventListener('change', function () {
+            const filterValue = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#availability table tbody tr');
+
+            tableRows.forEach(function (row) {
+                const statusCell = row.cells[3];
+                const statusText = statusCell.textContent.trim().toLowerCase();
+
+                if (filterValue === 'all' || statusText === filterValue) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+function trackParcel() {
+    const tracking = document.getElementById('trackingInput').value.trim();
+    if (!tracking) {
+        alert('Please enter a tracking number.');
+        return;
+    }
+
+    fetch(`track-parcel.php?tracking=${tracking}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const parcel = data.data;
+
+                // Update Parcel Details table
+                document.querySelector('#detailsTable tbody').innerHTML = `
+                    <tr>
+                        <td>${parcel.size}</td>
+                        <td>${parcel.weight}</td>
+                        <td>${parcel.trackingNumber}</td>
+                        <td>${parcel.status}</td>
+                        <td>${parcel.deliveryLocation}</td>
+                    </tr>
+                `;
+
+                // Optional: Switch to "Parcel Details" tab
+                const tab = new bootstrap.Tab(document.querySelector('#details-tab'));
+                tab.show();
+
+                // Optional: Show modal
+                const modal = new bootstrap.Modal(document.getElementById('parcelInfoModal'));
+                document.querySelector('#parcelInfoModal .modal-body').innerHTML = `
+                    <p><strong>Tracking:</strong> ${parcel.trackingNumber}</p>
+                    <p><strong>Size:</strong> ${parcel.size}</p>
+                    <p><strong>Weight:</strong> ${parcel.weight}</p>
+                    <p><strong>Status:</strong> ${parcel.status}</p>
+                    <p><strong>Location:</strong> ${parcel.deliveryLocation}</p>
+                `;
+                modal.show();
+
+            } else {
+                alert(data.message || 'Parcel not found.');
+            }
+        })
+        .catch(error => {
+            alert('Error fetching parcel data.');
+            console.error(error);
+        });
+}
+
+
+        function editReceiverDetails() {
+            const name = document.getElementById('receiverName').value.trim();
+            const phone = document.getElementById('receiverPhone').value.trim();
+
+            if (!name || !phone) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            // Implement your update logic here (e.g., send data to backend)
+            alert(`Receiver details updated:\nName: ${name}\nPhone: ${phone}`);
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</body>
+</html>

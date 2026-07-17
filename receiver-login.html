@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPC Receiver Login</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="icon" href="assets/Icon Web.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"> 
+</head>
+
+<body class="receiver-login-body"> 
+    <div class="auth-container">
+        <div class="left-panel">
+            <h2>Welcome Back!</h2>
+            <p>Parcel just arrived? Login now to retrieve it.</p>
+            <img src="assets/parceldeliverGIF2.gif" alt="Login Illustration">
+        </div>
+
+        <div class="right-panel">
+            <h2>Receiver Login</h2>
+            <form action="receiver-login.php" method="POST" class="w-100">
+                <div class="mb-3 w-100">
+                    <label for="icnumber" class="form-label">IC No</label>
+                    <input 
+                        type="text"
+                        class="form-control"
+                        id="icnumber"
+                        name="icnumber"
+                        placeholder="Enter your IC No." 
+                        required>
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password" 
+                        required>
+                </div>
+                <button type="submit" class="btn login-btn-primary w-100">Login</button> 
+            </form>
+
+            <p class="text-center mt-4">
+                Not yet a member? 
+                <a href="receiver-register.html">Register here</a>
+            </p>
+            <div class="text-center mt-3">
+                <a href="landingpage.html" class="btn login-btn-secondary w-100">Back to Landing Page</a> 
+            </div>
+        </div>
+    </div>
+
+    <div class="copyright text-center small mt-4">
+        <p class="mb-0">Made <i class="fas fa-heart text-danger"></i> by Group 7</p>
+        &copy; All rights reserved.
+    </div>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

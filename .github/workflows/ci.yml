@@ -1,0 +1,59 @@
+name: CI
+
+# Runs on every push to any branch, and on every PR aimed at main.
+# The PR run is the one that gates merging.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-php:
+    name: PHP syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint every PHP file
+        run: |
+          fail=0
+          while IFS= read -r -d '' file; do
+            if ! php -l "$file" > /dev/null 2>&1; then
+              echo "::error file=$file::PHP syntax error"
+              php -l "$file" || true
+              fail=1
+            fi
+          done < <(find . -name '*.php' -not -path './vendor/*' -print0)
+          if [ "$fail" -eq 0 ]; then
+            echo "All PHP files parse cleanly."
+          fi
+          exit $fail
+
+  hygiene:
+    name: Repo hygiene
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generated QR cache must not be committed
+        run: |
+          if git ls-files --error-unmatch 'phpqrcode/cache/*' > /dev/null 2>&1; then
+            echo "::error::phpqrcode/cache/ is tracked. It is generated at runtime — remove it with: git rm -r --cached phpqrcode/cache"
+            exit 1
+          fi
+          echo "QR cache is correctly untracked."
+
+      - name: Secrets must not be committed
+        run: |
+          if git ls-files | grep -qE '(^|/)\.env$'; then
+            echo "::error::A .env file is tracked. Remove it and keep it in .gitignore."
+            exit 1
+          fi
+          echo "No .env files tracked."

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPC Staff Login</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="icon" href="assets/Icon Web.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body class="staff-login-body">
+    <div class="auth-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h2>Welcome Staff!</h2>
+            <p>Ready to manage your tasks? Login to get started.</p>
+            <img src="assets/stafflogin.gif" alt="Staff Login Illustration">
+        </div>
+
+        <!-- Right Panel (Form) -->
+        <div class="right-panel">
+            <h2>Staff Login</h2>
+        <form action="staff-login.php" method="POST" class="w-100">
+                <!-- Staff ID Field -->
+                <div class="mb-3 w-100">
+                    <label for="staffID" class="form-label">Staff ID</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="staffID" 
+                        name="staffID" 
+                        placeholder="Enter your Staff ID" 
+                        required>
+                </div>
+                <!-- Password Field -->
+                <div class="mb-3 w-100">
+                    <label for="staff-password" class="form-label">Password</label>
+                    <input 
+                        type="password" 
+                        class="form-control" 
+                        id="staff-password" 
+                        name="password" 
+                        placeholder="Enter your password" 
+                        required>
+                </div>
+                <!-- Login Button -->
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+            <script>
+                function redirectToStaffDashboard(event) {
+                    event.preventDefault(); // Prevent the default form submission
+                    window.location.href = 'staff-dashboard.php'; // Redirect to the dashboard
+                }
+            </script>
+            <!-- Additional Links -->
+            <p class="text-center mt-4">
+                Not yet a member? 
+                <a href="staff-register.html">Register here</a>
+            </p>
+            <div class="text-center mt-3">
+                <a href="landingpage.html" class="btn btn-secondary w-100">Back to Landing Page</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="copyright text-center small mt-4">
+                <p class="mb-0">Made <i class="fas fa-heart text-danger"></i> by Group 7</p>
+                &copy; All rights reserved.
+            </div>
+
+    <!-- Local Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

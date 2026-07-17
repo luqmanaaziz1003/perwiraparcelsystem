@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPC Receiver Registration</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="icon" href="assets/Icon Web.ico" type="image/x-icon">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #5F88B8 0%, #82B366 100%);
+            color: #fff;
+            overflow: auto;
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        .auth-container {
+            display: flex;
+            flex-direction: row;
+            background: transparent;
+            width: 90%;
+            max-width: 1200px;
+            min-height: 600px;
+            margin: 40px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .left-panel {
+            width: 50%;
+            background: linear-gradient(135deg, #fff, #fff);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+            border-right: 2px solid #5F88B8;
+        }
+
+        .left-panel h2 {
+            font-size: 2.3rem;
+            color: #2C3E50;
+            margin-bottom: 20px;
+        }
+
+        .left-panel img {
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+
+        .left-panel blockquote {
+            font-style: italic;
+            color: #5F88B8;
+            margin-top: 20px;
+        }
+
+        .right-panel {
+            width: 50%;
+            background: #FFFFFF;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .right-panel h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2C3E50;
+            margin-bottom: 15px;
+        }
+
+        .mb-3 {
+            margin-bottom: 10px;
+        }
+
+        .form-control {
+            border: 2px solid #5F88B8;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #2C3E50;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-control:focus {
+            border-color: #82B366;
+            box-shadow: 0 0 8px rgba(130, 179, 102, 0.5);
+        }
+
+        .btn-primary {
+            background: #5F88B8;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #FFFFFF;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-primary:hover {
+            background: #4A7B9D;
+        }
+
+        .btn-secondary {
+            background: #82B366;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #FFFFFF;
+            margin-top: 15px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .btn-secondary:hover {
+            background: #6DA63F;
+        }
+
+        a {
+            color: #5F88B8;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease-in-out;
+        }
+
+        a:hover {
+            color: #82B366;
+        }
+
+        p {
+            color: #4D5E6F;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-panel,
+            .right-panel {
+                width: 100%;
+                border-right: none;
+            }
+
+            .right-panel {
+                padding: 15px;
+            }
+
+            .form-label {
+                color: black;
+            }
+        }
+
+        .form-label {
+            color: black;
+         }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h2>Join Us Now!</h2>
+            <img src="assets/parcelsecure.gif" alt="Receiver Register Illustration">
+            <blockquote>"Your parcel could not be more secure in our care"</blockquote>
+        </div>
+
+        <!-- Right Panel (Form) -->
+        <div class="right-panel">
+            <h2>Receiver Registration</h2>
+            <form action="receiver-register.php" method="POST" class="w-100" id="registrationForm">
+                <div class="mb-3 w-100">
+                    <label for="receiver-name" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="receiver-name" name="name" placeholder="Enter your full name" required>
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="icnumber" class="form-label">IC No</label>
+                    <input type="text" class="form-control" id="icnumber" name="icnumber" placeholder="Enter your IC No." required maxlength="12" pattern="^[0-9]{12}$" title="IC No must be exactly 12 digits.">
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required pattern="\d{10,15}" title="Phone number must be between 10 to 15 digits.">
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="receiver-password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="receiver-password" name="password" placeholder="Create a password" required minlength="8" title="Password must be at least 8 characters long.">
+                </div>
+                <div class="mb-3 w-100">
+                    <label for="receiver-confirm-password" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control" id="receiver-confirm-password" name="confirm_password" placeholder="Confirm your password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+            <hr>
+            <p class="text-center mt-3">
+                Already have an account?
+                <a href="receiver-login.html">Login</a>
+            </p>
+            <div class="text-center mt-3">
+                <a href="landingpage.html" class="btn btn-secondary w-100">Back to Landing Page</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

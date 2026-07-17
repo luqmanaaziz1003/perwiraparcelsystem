@@ -1,0 +1,27 @@
+# Generated QR code cache — regenerated at runtime, never commit
+phpqrcode/cache/
+
+# 345 MB and unused — landingpage.html plays BackgroundAnimation.mp4 instead.
+# Exceeds GitHub's 100 MB hard limit and would block every push.
+assets/BackgroundAnimation.gif
+
+# Editor / OS noise
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# Logs and local dumps
+*.log
+*.sql.bak
+
+# Dependencies, if Composer/npm are ever added
+/vendor/
+/node_modules/
+
+# Local environment overrides
+.env
+.env.local
+db_connect.local.php
