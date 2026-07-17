@@ -1,6 +1,8 @@
 <?php
 require 'db_connect.php';
 
+header('Content-Type: application/json');
+
 $tracking = $_GET['tracking'] ?? '';
 
 if (empty($tracking)) {
@@ -8,18 +10,12 @@ if (empty($tracking)) {
     exit;
 }
 
-$stmt = $conn->prepare("SELECT * FROM parcel WHERE trackingNumber = ?");
-$stmt->bind_param("s", $tracking);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt = $pdo->prepare('SELECT * FROM parcel WHERE "trackingNumber" = ?');
+$stmt->execute([$tracking]);
+$parcel = $stmt->fetch();
 
-if ($result->num_rows > 0) {
-    $parcel = $result->fetch_assoc();
+if ($parcel) {
     echo json_encode(['status' => 'success', 'data' => $parcel]);
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Parcel not found.']);
 }
-
-$stmt->close();
-$conn->close();
-?>

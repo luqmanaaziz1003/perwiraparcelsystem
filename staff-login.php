@@ -10,14 +10,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['staffID']) && isset($
     $staffID = trim($_POST['staffID']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM Staff WHERE staffID = ?");
-    $stmt->bind_param("s", $staffID);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $pdo->prepare('SELECT * FROM staff WHERE "staffID" = ?');
+    $stmt->execute([$staffID]);
+    $user = $stmt->fetch();
 
-    if ($result && $result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-
+    if ($user) {
         // ONLY redirect if password matches
         if ($password === $user['password']) {
             $_SESSION['staffID'] = $user['staffID'];
@@ -37,4 +34,3 @@ else {
     echo "<script>alert('Invalid request.'); window.history.back();</script>";
     exit;
 }
-?>

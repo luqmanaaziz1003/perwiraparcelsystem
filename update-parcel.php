@@ -9,21 +9,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $size = $_POST['size'];
     $location = $_POST['deliveryLocation'];
 
-    $sql = "UPDATE parcel SET 
-                trackingNumber = ?, 
-                ICNo = ?, 
-                weight = ?, 
-                size = ?, 
-                deliveryLocation = ? 
-            WHERE trackingNumber = ?";
+    $sql = 'UPDATE parcel SET
+                "trackingNumber" = ?,
+                "ICNo" = ?,
+                weight = ?,
+                size = ?,
+                "deliveryLocation" = ?
+            WHERE "trackingNumber" = ?';
 
-    $stmt = mysqli_prepare($conn, $sql);
-    mysqli_stmt_bind_param($stmt, "ssdsss", $trackingNumber, $ICNo, $weight, $size, $location, $originalTracking);
-
-    if (mysqli_stmt_execute($stmt)) {
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$trackingNumber, $ICNo, $weight, $size, $location, $originalTracking]);
         echo "Success";
-    } else {
-        echo "Error: " . mysqli_error($conn);
+    } catch (PDOException $e) {
+        // Don't echo the driver message — it leaks schema details to the browser.
+        error_log('Update parcel failed: ' . $e->getMessage());
+        echo "Error: could not update parcel.";
     }
 }
-?>

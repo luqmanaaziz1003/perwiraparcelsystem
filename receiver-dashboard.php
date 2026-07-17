@@ -1,6 +1,6 @@
 <?php
 
-include 'db_connect.php'; // Added missing semicolon
+include 'db_connect.php';
 
 header('Content-Type: application/json'); // Set response type to JSON
 
@@ -11,32 +11,18 @@ if (empty($trackingNumber)) {
     exit;
 }
 
-$sql = "SELECT * FROM parcel WHERE tracking_number = ?";
-$stmt = $conn->prepare($sql);
-
-if (!$stmt) {
-    // If prepare fails
-    echo json_encode(["status" => "error", "message" => "Database error: failed to prepare statement."]);
+try {
+    $stmt = $pdo->prepare('SELECT * FROM parcel WHERE "trackingNumber" = ?');
+    $stmt->execute([$trackingNumber]);
+    $parcel = $stmt->fetch();
+} catch (PDOException $e) {
+    error_log('Parcel lookup failed: ' . $e->getMessage());
+    echo json_encode(["status" => "error", "message" => "Database error."]);
     exit;
 }
 
-$stmt->bind_param("s", $trackingNumber);
-
-if (!$stmt->execute()) {
-    // If execution fails
-    echo json_encode(["status" => "error", "message" => "Database error: failed to execute statement."]);
-    exit;
-}
-
-$result = $stmt->get_result();
-
-if ($result && $result->num_rows > 0) {
-    $parcel = $result->fetch_assoc();
+if ($parcel) {
     echo json_encode(["status" => "success", "data" => $parcel]);
 } else {
     echo json_encode(["status" => "not_found", "message" => "Parcel not found."]);
 }
-
-$stmt->close();
-$conn->close();
-?>

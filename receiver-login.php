@@ -6,15 +6,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $icnumber = trim($_POST['icnumber']);
     $password = $_POST['password'];
 
-    $stmt = $conn->prepare("SELECT * FROM Receiver WHERE ICNo = ?");
-    $stmt->bind_param("s", $icnumber);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = $pdo->prepare('SELECT * FROM receiver WHERE "ICNo" = ?');
+    $stmt->execute([$icnumber]);
+    $user = $stmt->fetch();
 
-    if ($result && $result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-
+    if ($user) {
         // ONLY redirect if password matches
+        // NOTE: still a plaintext comparison — see password_verify() below.
         if ($password === $user['password']) {
             $_SESSION['icnumber'] = $user['ICNo'];
             $_SESSION['username'] = $user['username'];
@@ -33,4 +31,3 @@ else {
     echo "<script>alert('Invalid request.'); window.history.back();</script>";
     exit;
 }
-?>
