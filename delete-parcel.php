@@ -1,23 +1,20 @@
 <?php
 // delete.php
-include 'db_connect.php'; // adjust to your connection file
+include 'db_connect.php';
+
+header('Content-Type: application/json');
 
 if (isset($_POST['trackingNumber'])) {
     $trackingNumber = $_POST['trackingNumber'];
 
-    $sql = "DELETE FROM parcel WHERE trackingNumber = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $trackingNumber);
-
-    if ($stmt->execute()) {
+    try {
+        $stmt = $pdo->prepare('DELETE FROM parcel WHERE "trackingNumber" = ?');
+        $stmt->execute([$trackingNumber]);
         echo json_encode(["success" => true]);
-    } else {
-        echo json_encode(["success" => false, "error" => $stmt->error]);
+    } catch (PDOException $e) {
+        error_log('Delete parcel failed: ' . $e->getMessage());
+        echo json_encode(["success" => false, "error" => "Could not delete parcel."]);
     }
-
-    $stmt->close();
-    $conn->close();
 } else {
     echo json_encode(["success" => false, "error" => "No tracking number provided"]);
 }
-?>

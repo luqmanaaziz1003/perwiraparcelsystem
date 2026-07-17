@@ -17,39 +17,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     // 2. Check for existing IC
-    $check = $conn->prepare("SELECT ICNo FROM Receiver WHERE ICNo = ?");
-    if (!$check) {
-        echo "<script>alert('Database error: " . $conn->error . "'); window.history.back();</script>";
-        exit();
-    }
-    $check->bind_param("s", $icnumber);
-    $check->execute();
-    $check->store_result();
+    $check = $pdo->prepare('SELECT "ICNo" FROM receiver WHERE "ICNo" = ?');
+    $check->execute([$icnumber]);
 
-    if ($check->num_rows > 0) {
+    if ($check->fetch()) {
         echo "<script>alert('IC number is already registered.'); window.history.back();</script>";
-        $check->close();
         exit();
     }
-    $check->close();
 
-    // 3. Insert user WITHOUT hashing password
-    $stmt = $conn->prepare("INSERT INTO Receiver (ICNo, username, phone_number, password) VALUES (?, ?, ?, ?)");
-    if (!$stmt) {
-        echo "<script>alert('Database error: " . $conn->error . "'); window.history.back();</script>";
+    // 3. Check for existing phone number — it has a UNIQUE index, so without
+    //    this the INSERT below throws instead of telling the user why.
+    $checkPhone = $pdo->prepare('SELECT "ICNo" FROM receiver WHERE phone_number = ?');
+    $checkPhone->execute([$phone]);
+
+    if ($checkPhone->fetch()) {
+        echo "<script>alert('This phone number is already registered.'); window.history.back();</script>";
         exit();
     }
-    $stmt->bind_param("ssss", $icnumber, $username, $phone, $password);
 
-    if ($stmt->execute()) {
+    // 4. Insert user WITHOUT hashing password
+    $stmt = $pdo->prepare('INSERT INTO receiver ("ICNo", username, phone_number, password) VALUES (?, ?, ?, ?)');
+
+    try {
+        $stmt->execute([$icnumber, $username, $phone, $password]);
         echo "<script>alert('Registration successful!'); window.location.href='receiver-login.html';</script>";
-    } else {
-        echo "<script>alert('Error: " . $stmt->error . "'); window.history.back();</script>";
+    } catch (PDOException $e) {
+        // 23000 (MySQL) / 23505 (Postgres) = integrity constraint violation.
+        // Another request can win the race between the checks above and this insert.
+        if ($e->getCode() === '23000' || $e->getCode() === '23505') {
+            echo "<script>alert('That IC number or phone number is already registered.'); window.history.back();</script>";
+        } else {
+            error_log('Receiver registration failed: ' . $e->getMessage());
+            echo "<script>alert('Registration failed. Please try again later.'); window.history.back();</script>";
+        }
     }
-
-    $stmt->close();
-    $conn->close();
-} else {
+}
+else {
     echo "<script>alert('Invalid request.'); window.history.back();</script>";
 }
-?>

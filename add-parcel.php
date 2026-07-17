@@ -1,15 +1,6 @@
 <?php
-
-// Connect to MySQL
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "project_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+// Uses the shared connection instead of its own hardcoded credentials.
+include 'db_connect.php';
 
 // Validate received POST data
 $trackingNumber = isset($_POST['trackingNumber']) ? trim($_POST['trackingNumber']) : null;
@@ -24,71 +15,51 @@ if (!$trackingNumber || !$weight || !$size || !$deliveryLocation || !$ICNo) {
 }
 
 // Check if tracking number already exists
-$checkQuery = "SELECT trackingNumber FROM parcel WHERE trackingNumber = ?";
-$checkStmt = $conn->prepare($checkQuery);
-$checkStmt->bind_param("s", $trackingNumber);
-$checkStmt->execute();
-$checkStmt->store_result();
+$checkStmt = $pdo->prepare('SELECT "trackingNumber" FROM parcel WHERE "trackingNumber" = ?');
+$checkStmt->execute([$trackingNumber]);
 
-if ($checkStmt->num_rows > 0) {
+if ($checkStmt->fetch()) {
     echo "<script>alert('Tracking number already exists. Please use a unique one.'); window.history.back();</script>";
-    $checkStmt->close();
-    $conn->close();
     exit;
 }
-$checkStmt->close();
 
 // Get receiver info from receiver table
-$receiverQuery = "SELECT username FROM receiver WHERE ICNo = ?";
-$receiverStmt = $conn->prepare($receiverQuery);
-$receiverStmt->bind_param("s", $ICNo);
-$receiverStmt->execute();
-$receiverStmt->bind_result($receiverName);
-$receiverStmt->fetch();
-$receiverStmt->close();
+$receiverStmt = $pdo->prepare('SELECT username FROM receiver WHERE "ICNo" = ?');
+$receiverStmt->execute([$ICNo]);
+$receiver = $receiverStmt->fetch();
 
 // Check if ICNo exists
-if (empty($receiverName)) {
+if (!$receiver) {
     echo "<script>alert('IC No not available in receiver database. Please check again.'); window.history.back();</script>";
-    $conn->close();
     exit;
 }
 
-$name = $receiverName;
+$name = $receiver['username'];
 
 $date_received = date('Y-m-d');
 $time = date('H:i:s');
-$status = 'Pending';
+// Must match the parcel_status enum in the database exactly — 'Pending' with a
+// capital P is not a valid value in Postgres.
+$status = 'pending';
 
-// Insert into parcel table
-$sql = "INSERT INTO parcel (trackingNumber, ICNo, date_received, time, status, name, weight, deliveryLocation, size)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+$sql = 'INSERT INTO parcel ("trackingNumber", "ICNo", date_received, time, status, name, weight, "deliveryLocation", size)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-$stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("Prepare failed: " . $conn->error);
-}
-
-$stmt->bind_param(
-    "ssssssdss",
-    $trackingNumber,
-    $ICNo,
-    $date_received,
-    $time,
-    $status,
-    $name,
-    $weight,
-    $deliveryLocation,
-    $size
-);
-
-if ($stmt->execute()) {
+try {
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        $trackingNumber,
+        $ICNo,
+        $date_received,
+        $time,
+        $status,
+        $name,
+        $weight,
+        $deliveryLocation,
+        $size,
+    ]);
     echo "<script>alert('Parcel added successfully!'); window.location.href='staff-dashboard.php';</script>";
-} else {
-    echo "Error: " . $stmt->error;
+} catch (PDOException $e) {
+    error_log('Add parcel failed: ' . $e->getMessage());
+    echo "<script>alert('Could not add parcel. Please try again.'); window.history.back();</script>";
 }
-
-$stmt->close();
-$conn->close();
-
-?>

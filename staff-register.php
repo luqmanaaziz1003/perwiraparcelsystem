@@ -24,30 +24,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Check if staffId already exists
-    $stmt = $conn->prepare("SELECT staffId FROM Staff WHERE staffId = ?");
-    $stmt->bind_param("s", $staffId); 
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Check if staffID already exists
+    $stmt = $pdo->prepare('SELECT "staffID" FROM staff WHERE "staffID" = ?');
+    $stmt->execute([$staffId]);
 
-    if ($result && $result->num_rows > 0) {
+    if ($stmt->fetch()) {
         echo "<script>alert('Staff ID already registered. Please use a different Staff ID.'); window.history.back();</script>";
         exit;
     }
 
     // Insert new staff without hashing password
-    $insertStmt = $conn->prepare("INSERT INTO Staff (username, staffId, password) VALUES (?, ?, ?)");
-    $insertStmt->bind_param("sss", $username, $staffId, $password);
+    $insertStmt = $pdo->prepare('INSERT INTO staff (username, "staffID", password) VALUES (?, ?, ?)');
 
-    if ($insertStmt->execute()) {
+    try {
+        $insertStmt->execute([$username, $staffId, $password]);
         echo "<script>alert('Registration successful! Please login.'); window.location.href = 'staff-login.html';</script>";
         exit;
-    } else {
-        echo "<script>alert('Registration failed. Please try again later.'); window.history.back();</script>";
+    } catch (PDOException $e) {
+        // PDO throws on error, so a plain if/else on execute() would be dead code.
+        if ($e->getCode() === '23000' || $e->getCode() === '23505') {
+            echo "<script>alert('Staff ID already registered. Please use a different Staff ID.'); window.history.back();</script>";
+        } else {
+            error_log('Staff registration failed: ' . $e->getMessage());
+            echo "<script>alert('Registration failed. Please try again later.'); window.history.back();</script>";
+        }
         exit;
     }
 } else {
     echo "<script>alert('Invalid request.'); window.history.back();</script>";
     exit;
 }
-?>
