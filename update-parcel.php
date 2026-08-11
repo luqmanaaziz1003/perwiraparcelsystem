@@ -1,29 +1,22 @@
 <?php
+// Staff action: mark a parcel as retrieved once the student collects it.
+// (Weight/size/location editing was removed — receivers now own parcel data.)
 include 'db_connect.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $originalTracking = $_POST['originalTrackingNumber'];
-    $trackingNumber = $_POST['trackingNumber'];
-    $ICNo = $_POST['ICNo'];
-    $weight = $_POST['weight'];
-    $size = $_POST['size'];
-    $location = $_POST['deliveryLocation'];
+header('Content-Type: application/json');
 
-    $sql = 'UPDATE parcel SET
-                "trackingNumber" = ?,
-                "ICNo" = ?,
-                weight = ?,
-                size = ?,
-                "deliveryLocation" = ?
-            WHERE "trackingNumber" = ?';
+$trackingNumber = $_POST['trackingNumber'] ?? '';
 
-    try {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$trackingNumber, $ICNo, $weight, $size, $location, $originalTracking]);
-        echo "Success";
-    } catch (PDOException $e) {
-        // Don't echo the driver message — it leaks schema details to the browser.
-        error_log('Update parcel failed: ' . $e->getMessage());
-        echo "Error: could not update parcel.";
-    }
+if ($trackingNumber === '') {
+    echo json_encode(['success' => false, 'error' => 'No tracking number provided']);
+    exit;
+}
+
+try {
+    $stmt = $pdo->prepare('UPDATE parcel SET status = ? WHERE "trackingNumber" = ?');
+    $stmt->execute(['retrieved', $trackingNumber]);
+    echo json_encode(['success' => true]);
+} catch (PDOException $e) {
+    error_log('Mark retrieved failed: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'Could not update parcel.']);
 }

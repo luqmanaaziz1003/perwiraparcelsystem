@@ -62,3 +62,19 @@ try {
     http_response_code(500);
     exit('Database connection failed. Check the error log.');
 }
+
+/**
+ * Check a submitted password against a stored one.
+ *
+ * Handles both hashed passwords (password_hash) and legacy plaintext values
+ * left over from before hashing was added, so existing accounts keep working
+ * while new ones are stored hashed. hash_equals guards the plaintext path
+ * against timing attacks.
+ */
+function password_matches(string $submitted, string $stored): bool
+{
+    if (password_get_info($stored)['algo']) {
+        return password_verify($submitted, $stored);
+    }
+    return hash_equals($stored, $submitted);
+}

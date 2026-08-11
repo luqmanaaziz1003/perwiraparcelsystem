@@ -35,11 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit();
     }
 
-    // 4. Insert user WITHOUT hashing password
+    // 4. Hash the password before storing it. Never store the raw password.
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
     $stmt = $pdo->prepare('INSERT INTO receiver ("ICNo", username, phone_number, password) VALUES (?, ?, ?, ?)');
 
     try {
-        $stmt->execute([$icnumber, $username, $phone, $password]);
+        $stmt->execute([$icnumber, $username, $phone, $hashedPassword]);
         echo "<script>alert('Registration successful!'); window.location.href='receiver-login.html';</script>";
     } catch (PDOException $e) {
         // 23000 (MySQL) / 23505 (Postgres) = integrity constraint violation.

@@ -17,6 +17,10 @@ desktop.ini
 *.log
 *.sql.bak
 
+# Uploaded parcel photos — user content, not source. Keep the folder, not the files.
+uploads/parcels/*
+!uploads/parcels/.gitkeep
+
 # Dependencies, if Composer/npm are ever added
 /vendor/
 /node_modules/

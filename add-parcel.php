@@ -1,65 +1,96 @@
 <?php
-// Uses the shared connection instead of its own hardcoded credentials.
+// Receiver registers a parcel they are expecting. The IC comes from the
+// logged-in session, never from the form, so a receiver can only add parcels
+// under their own account.
+session_start();
 include 'db_connect.php';
 
-// Validate received POST data
-$trackingNumber = isset($_POST['trackingNumber']) ? trim($_POST['trackingNumber']) : null;
-$weight = isset($_POST['weight']) ? floatval($_POST['weight']) : null;
-$size = isset($_POST['size']) ? trim($_POST['size']) : null;
-$deliveryLocation = isset($_POST['deliveryLocation']) ? trim($_POST['deliveryLocation']) : null;
-$ICNo = isset($_POST['ICNo']) ? trim($_POST['ICNo']) : null;
-
-if (!$trackingNumber || !$weight || !$size || !$deliveryLocation || !$ICNo) {
-    echo "<script>alert('Please fill in all required fields.'); window.history.back();</script>";
+if (!isset($_SESSION['icnumber'])) {
+    header('Location: receiver-login.html');
     exit;
 }
 
-// Check if tracking number already exists
-$checkStmt = $pdo->prepare('SELECT "trackingNumber" FROM parcel WHERE "trackingNumber" = ?');
-$checkStmt->execute([$trackingNumber]);
-
-if ($checkStmt->fetch()) {
-    echo "<script>alert('Tracking number already exists. Please use a unique one.'); window.history.back();</script>";
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: receiver-dashboard.php');
     exit;
 }
 
-// Get receiver info from receiver table
-$receiverStmt = $pdo->prepare('SELECT username FROM receiver WHERE "ICNo" = ?');
-$receiverStmt->execute([$ICNo]);
-$receiver = $receiverStmt->fetch();
+$ICNo           = $_SESSION['icnumber'];
+$name           = $_SESSION['username'] ?? '';
+$trackingNumber = trim($_POST['trackingNumber'] ?? '');
+$platform       = trim($_POST['platform'] ?? '');
+$description    = trim($_POST['description'] ?? '');
 
-// Check if ICNo exists
-if (!$receiver) {
-    echo "<script>alert('IC No not available in receiver database. Please check again.'); window.history.back();</script>";
+// Small helper so every failure returns the receiver to the dashboard with a message.
+function fail(string $msg): void {
+    echo "<script>alert(" . json_encode($msg) . "); window.location.href='receiver-dashboard.php';</script>";
     exit;
 }
 
-$name = $receiver['username'];
+if ($trackingNumber === '' || $platform === '' || $description === '') {
+    fail('Please fill in the tracking number, platform, and description.');
+}
 
-$date_received = date('Y-m-d');
+// Tracking number is the primary key — reject duplicates before inserting.
+$check = $pdo->prepare('SELECT 1 FROM parcel WHERE "trackingNumber" = ?');
+$check->execute([$trackingNumber]);
+if ($check->fetch()) {
+    fail('That tracking number is already registered.');
+}
+
+// ---- Optional photo upload -------------------------------------------------
+$imagePath = null;
+if (isset($_FILES['photo']) && $_FILES['photo']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $photo = $_FILES['photo'];
+
+    if ($photo['error'] !== UPLOAD_ERR_OK) {
+        fail('The photo failed to upload. Please try again.');
+    }
+    if ($photo['size'] > 5 * 1024 * 1024) {
+        fail('The photo must be 5 MB or smaller.');
+    }
+
+    // Trust the file's actual content, not its name or the browser-sent type.
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($photo['tmp_name']);
+    $allowed = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp',
+        'image/gif'  => 'gif',
+    ];
+    if (!isset($allowed[$mime])) {
+        fail('Only JPG, PNG, WEBP, or GIF images are allowed.');
+    }
+
+    // Generate our own filename so a malicious name can't traverse the path or
+    // overwrite another parcel's photo.
+    $safeTracking = preg_replace('/[^A-Za-z0-9_-]/', '', $trackingNumber);
+    $filename = $safeTracking . '_' . bin2hex(random_bytes(4)) . '.' . $allowed[$mime];
+    $destDir  = __DIR__ . '/uploads/parcels';
+    if (!move_uploaded_file($photo['tmp_name'], $destDir . '/' . $filename)) {
+        fail('Could not save the photo. Please try again.');
+    }
+    // Store a web-relative path so pages can display it directly.
+    $imagePath = 'uploads/parcels/' . $filename;
+}
+
+// ---- Insert ----------------------------------------------------------------
+$date = date('Y-m-d');
 $time = date('H:i:s');
-// Must match the parcel_status enum in the database exactly — 'Pending' with a
-// capital P is not a valid value in Postgres.
-$status = 'pending';
-
-$sql = 'INSERT INTO parcel ("trackingNumber", "ICNo", date_received, time, status, name, weight, "deliveryLocation", size)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
 try {
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        $trackingNumber,
-        $ICNo,
-        $date_received,
-        $time,
-        $status,
-        $name,
-        $weight,
-        $deliveryLocation,
-        $size,
-    ]);
-    echo "<script>alert('Parcel added successfully!'); window.location.href='staff-dashboard.php';</script>";
+    $stmt = $pdo->prepare(
+        'INSERT INTO parcel ("trackingNumber", "ICNo", date_received, time, name, status, platform, description, image_path)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    $stmt->execute([$trackingNumber, $ICNo, $date, $time, $name, 'pending', $platform, $description, $imagePath]);
+    echo "<script>alert('Parcel registered! We will notify you when it arrives.'); window.location.href='receiver-dashboard.php';</script>";
 } catch (PDOException $e) {
-    error_log('Add parcel failed: ' . $e->getMessage());
-    echo "<script>alert('Could not add parcel. Please try again.'); window.history.back();</script>";
+    // If the insert failed after the photo was saved, don't leave it orphaned.
+    if ($imagePath !== null && file_exists(__DIR__ . '/' . $imagePath)) {
+        unlink(__DIR__ . '/' . $imagePath);
+    }
+    error_log('Receiver add parcel failed: ' . $e->getMessage());
+    fail('Could not register the parcel. Please try again.');
 }

@@ -11,12 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user) {
-        // ONLY redirect if password matches
-        // NOTE: still a plaintext comparison — see password_verify() below.
-        if ($password === $user['password']) {
+        if (password_matches($password, $user['password'])) {
+            // If this account still has a legacy plaintext password, upgrade it
+            // to a hash now that we know the real password.
+            if (!password_get_info($user['password'])['algo']) {
+                $upgrade = $pdo->prepare('UPDATE receiver SET password = ? WHERE "ICNo" = ?');
+                $upgrade->execute([password_hash($password, PASSWORD_DEFAULT), $user['ICNo']]);
+            }
             $_SESSION['icnumber'] = $user['ICNo'];
             $_SESSION['username'] = $user['username'];
-            echo "<script>alert('Login successful!'); window.location.href = 'receiver-dashboard.html';</script>";
+            echo "<script>alert('Login successful!'); window.location.href = 'receiver-dashboard.php';</script>";
             exit;
         } else {
             echo "<script>alert('Incorrect password.'); window.history.back();</script>";

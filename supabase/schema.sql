@@ -43,10 +43,11 @@ CREATE TABLE "parcel" (
   "date_received"    date,
   "time"             time,
   "name"             varchar(100),
-  "weight"           numeric(10,2),
-  "deliveryLocation" varchar(255),
-  "size"             varchar(50),
-  "status"           parcel_status NOT NULL
+  "status"           parcel_status NOT NULL,
+  -- Registered by the receiver when they buy online:
+  "platform"         varchar(50),   -- Shopee, TikTok, Lazada, ...
+  "description"      text,          -- what the item is
+  "image_path"       varchar(255)   -- web-relative path to the uploaded photo
 );
 
 CREATE INDEX ON "parcel" ("ICNo");
