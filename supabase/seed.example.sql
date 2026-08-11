@@ -9,8 +9,8 @@ INSERT INTO "receiver" ("ICNo", "username", "phone_number", "password") VALUES
 INSERT INTO "staff" ("staffID", "username", "password") VALUES
   ('S001', 'Test Staff', 'REPLACE_WITH_HASH');
 
-INSERT INTO "parcel" ("trackingNumber", "ICNo", "date_received", "time", "name", "weight", "deliveryLocation", "size", "status") VALUES
-  ('TEST00000001', '000000000000', '2025-01-01', '09:00:00', 'Test Receiver', 1.00, 'PPC', 'M', 'pending');
+INSERT INTO "parcel" ("trackingNumber", "ICNo", "date_received", "time", "name", "status", "platform", "description") VALUES
+  ('TEST00000001', '000000000000', '2025-01-01', '09:00:00', 'Test Receiver', 'pending', 'Shopee', 'Sample item');
 
 -- Generate a hash to paste above with:
 --   php -r "echo password_hash('yourpassword', PASSWORD_DEFAULT);"

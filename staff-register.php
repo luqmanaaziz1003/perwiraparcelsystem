@@ -33,11 +33,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Insert new staff without hashing password
+    // Hash the password before storing it. Never store the raw password.
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
     $insertStmt = $pdo->prepare('INSERT INTO staff (username, "staffID", password) VALUES (?, ?, ?)');
 
     try {
-        $insertStmt->execute([$username, $staffId, $password]);
+        $insertStmt->execute([$username, $staffId, $hashedPassword]);
         echo "<script>alert('Registration successful! Please login.'); window.location.href = 'staff-login.html';</script>";
         exit;
     } catch (PDOException $e) {
